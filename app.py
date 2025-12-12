@@ -3,6 +3,11 @@ import requests
 import json
 from io import BytesIO
 
+import logging
+import os
+os.makedirs("/tmp", exist_ok=True)
+logging.basicConfig(filename='/tmp/streamlit.log', level=logging.INFO)
+
 # PDF/DOCX imports with fallbacks
 try:
     import pypdf as pdf_lib
