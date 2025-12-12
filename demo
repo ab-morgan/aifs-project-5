@@ -1,81 +1,44 @@
 #!/bin/bash
 
 PID_FILE="/tmp/demo.pid"
-LOG_FILE="/tmp/demo_access.log"
-IDLE_TIMEOUT=600  # 10 minutes
+OLLAMA_PID_FILE="/tmp/ollama.pid"
+STREAMLIT_PID_FILE="/tmp/streamlit.pid"
+IDLE_TIMEOUT=600
+
+log() { echo "[$(date +'%H:%M:%S')] $1"; }
 
 case "$1" in
     "start")
-        if [ -f "$PID_FILE" ]; then
-            echo "❌ Demo already running (PID: $(cat $PID_FILE))"
-            exit 1
-        fi
+        [ -f "$PID_FILE" ] && pkill -f "\$0 start" 2>/dev/null
+        log "🚀 Starting demo..."
         
-        echo "🚀 Starting demo with 10-min idle timeout..."
+        rm -f $PID_FILE $OLLAMA_PID_FILE $STREAMLIT_PID_FILE
         
-        # Start services
         ollama serve &
-        OLLAMA_PID=$!
-        sleep 3
+        echo $! > $OLLAMA_PID_FILE
+        sleep 5
         
         streamlit run app.py --server.headless true --server.port 8501 --server.address 0.0.0.0 &
-        STREAMLIT_PID=$!
+        echo $! > $STREAMLIT_PID_FILE
         
-        # Save PIDs
-        echo $OLLAMA_PID > /tmp/ollama.pid
-        echo $STREAMLIT_PID > /tmp/streamlit.pid
         echo $$ > $PID_FILE
+        log "✅ Demo running - Ctrl+C to stop"
         
-        echo "✅ Demo started! PIDs: Ollama=$OLLAMA_PID Streamlit=$STREAMLIT_PID"
-        echo "📊 Check ports panel for URLs"
-        
-        # REAL TRAFFIC MONITORING (access logs)
-        tail -f /tmp/streamlit.log 2>/dev/null | while read line; do
-            echo "$(date): $line" >> $LOG_FILE
-            LAST_ACTIVITY=$(date +%s)
-            echo "👤 Activity detected - timer reset"
-        done &
-        LOG_PID=$!
-        
-        # Idle monitoring loop
-        while true; do
-            sleep 60
-            if [ ! -f $PID_FILE ] || ! kill -0 $(cat $PID_FILE) 2>/dev/null; then
-                echo "🛑 Demo stopped externally"
-                exit 0
-            fi
-            
-            IDLE_SECONDS=$(( $(date +%s) - $LAST_ACTIVITY ))
-            if [ $IDLE_SECONDS -gt $IDLE_TIMEOUT ]; then
-                echo "😴 10 min idle - shutting down..."
-                $0 stop
-                exit 0
-            fi
-            echo "⏰ Idle: $(($IDLE_SECONDS/60))m | URLs active"
-        done &
+        while true; do sleep 30; done  # Keep alive
         ;;
-        
     "stop")
-        echo "🛑 Stopping demo..."
-        if [ -f "$PID_FILE" ]; then
-            kill $(cat $PID_FILE) 2>/dev/null
-            pkill -f "ollama serve"
-            pkill -f "streamlit run"
-        fi
-        rm -f $PID_FILE /tmp/ollama.pid /tmp/streamlit.pid
-        echo "✅ Demo stopped"
+        log "🛑 Stopping ALL demo processes..."
+        pkill -f "ollama serve" 2>/dev/null
+        pkill -f "streamlit run" 2>/dev/null
+        pkill -f "demo start" 2>/dev/null
+        sleep 3
+        rm -f $PID_FILE $OLLAMA_PID_FILE $STREAMLIT_PID_FILE
+        log "✅ Clean shutdown"
         ;;
-        
     "status")
-        if [ -f "$PID_FILE" ]; then
-            echo "✅ Running (PID: $(cat $PID_FILE))"
-        else
-            echo "⭕ Stopped"
-        fi
+        [ -f "$PID_FILE" ] && echo "✅ Running" || echo "⭕ Stopped"
         ;;
-        
     *)
         echo "Usage: $0 {start|stop|status}"
-        exit 1
         ;;
 esac
