@@ -3,3 +3,7 @@ requests
 pypdf
 PyPDF2
 python-docx
+pandas
+numpy
+datasets
+scikit-learn
