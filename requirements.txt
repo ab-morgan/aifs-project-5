@@ -7,3 +7,7 @@ pandas
 numpy
 datasets
 scikit-learn
+supabase
+openai
+sentence_transformers
+torch

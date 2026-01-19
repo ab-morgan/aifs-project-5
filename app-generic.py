@@ -1,3 +1,13 @@
+'''
+This code is the rewrite of the original app.py (currently called app.py.bak) to set up generic function call to the LLM.
+The idea was to isolate the generic LLM call in a single function for easier future modifications.
+'''
+
+
+
+
+
+
 import streamlit as st
 import requests
 import json
