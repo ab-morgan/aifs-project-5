@@ -1,13 +1,8 @@
 streamlit
-requests
 pypdf
 PyPDF2
 python-docx
-pandas
 numpy
-datasets
-scikit-learn
 supabase
-openai
 sentence_transformers
-torch
+tqdm
