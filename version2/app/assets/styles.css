@@ -1,0 +1,36 @@
+/* Global font smoothing */
+html, body, [class*="css"] {
+    -webkit-font-smoothing: antialiased;
+}
+
+/* Make the main container wider */
+.main > div {
+    padding-left: 2rem;
+    padding-right: 2rem;
+}
+
+/* Style job tiles */
+.job-tile {
+    background-color: #0A2540;
+    color: white;
+    padding: 1rem;
+    border-radius: 8px;
+    margin-bottom: 1rem;
+}
+
+/* Scrollable container styling */
+.scroll-container {
+    max-height: 600px;
+    overflow-y: auto;
+    padding-right: 10px;
+}
+
+/* Hide Streamlit default footer */
+footer {
+    visibility: hidden;
+}
+
+/* Hide Streamlit hamburger menu */
+#MainMenu {
+    visibility: hidden;
+}
