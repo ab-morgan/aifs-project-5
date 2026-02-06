@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  job-match-app:
+    build:
+      context: ..
+      dockerfile: version2/docker/Dockerfile
+    container_name: job-match-app
+    environment:
+      # Pass Supabase config via env or mount settings.toml
+      SUPABASE_URL: "${SUPABASE_URL}"
+      SUPABASE_SERVICE_ROLE_KEY: "${SUPABASE_SERVICE_ROLE_KEY}"
+    ports:
+      - "8501:8501"
+    volumes:
+      - ..:/app
+    restart: unless-stopped

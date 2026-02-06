@@ -1,0 +1,25 @@
+# Core
+numpy
+pandas
+scikit-learn
+
+# Embedding Providers
+openai>=1.0.0
+cohere
+sentence-transformers
+requests
+
+# Streamlit Runtime
+streamlit
+python-docx
+PyPDF2
+
+# Supabase
+supabase
+
+# Config + Utils
+toml
+python-dotenv
+
+# Optional but recommended for stability
+tqdm

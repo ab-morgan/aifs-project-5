@@ -1,0 +1,12 @@
+# settings.toml
+# Central configuration for version2
+
+[supabase]
+url = "https://YOUR-PROJECT.supabase.co"
+service_role_key = "YOUR-SERVICE-ROLE-KEY"
+
+[embeddings]
+provider = "ollama"            # "openai" | "ollama" | "sentence_transformer" | "cohere"
+model_name = "mxbai-embed-large"
+batch_size = 16
+normalize = true
