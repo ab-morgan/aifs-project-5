@@ -45,16 +45,17 @@ class VerifyReport:
 
 
 REQUIRED_TABLES = [
-    "jobs",
-    "job_embeddings",
-    "job_stats",
+    "jobhop_raw",
+    "jobhop_embeddings",
+    "jobhop_stats",
 ]
+
 
 
 def _check_supabase_connection(supabase) -> bool:
     try:
         # Simple ping: list tables or select 1 from a known table
-        response = supabase.table("jobs").select("*").limit(1).execute()
+        response = supabase.table("jobhop_raw").select("*").limit(1).execute()
         return response is not None
     except Exception as e:
         logger.error(f"Supabase connection check failed: {e}")
@@ -75,7 +76,7 @@ def _check_required_tables(supabase) -> Dict[str, bool]:
 
 def _check_embeddings_presence(supabase) -> bool:
     try:
-        response = supabase.table("job_embeddings").select("id").limit(1).execute()
+        response = supabase.table("jobhop_embeddings").select("id").limit(1).execute()
         data = getattr(response, "data", None) or response.get("data", [])
         return len(data) == 0  # True if missing
     except Exception as e:
@@ -86,7 +87,7 @@ def _check_embeddings_presence(supabase) -> bool:
 
 def _check_stats_presence(supabase) -> bool:
     try:
-        response = supabase.table("job_stats").select("id").limit(1).execute()
+        response = supabase.table("jobhop_stats").select("id").limit(1).execute()
         data = getattr(response, "data", None) or response.get("data", [])
         return len(data) == 0  # True if missing
     except Exception as e:

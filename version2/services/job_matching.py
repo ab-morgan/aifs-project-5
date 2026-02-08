@@ -13,40 +13,44 @@ This service:
 from __future__ import annotations
 
 from typing import List, Dict, Any
+from services.stats_service import get_stats_for_job
+
+def normalize_title(title: str) -> str:
+    return title.strip().lower()
 
 
-def prepare_job_matches(matches: List[Dict[str, Any]], jobs: List[Dict[str, Any]]) -> List[Dict[str, Any]]:
-    """
-    Combine similarity results with job metadata.
+def prepare_job_matches(matches, jobs, stats_by_title):
+    display_rows = []
 
-    Args:
-        matches: List of dicts with keys {job_id, similarity}
-        jobs: List of job metadata dicts
+    for job_index, similarity in matches:
+        job = jobs[job_index]
 
-    Returns:
-        List of dicts ready for UI display.
-    """
-    job_lookup = {job["id"]: job for job in jobs}
+        title = job.get("title")
+        description = job.get("description", "No description available.")
+        normalized = job.get("normalized_title")
 
-    rows = []
-    for m in matches:
-        job_id = m["job_id"]
-        similarity = m["similarity"]
+        raw_stats = stats_by_title.get(normalized, {})
 
-        job = job_lookup.get(job_id)
-        if not job:
-            continue
+        print("TITLE:", title, "NORMALIZED:", normalized, "HAS_STATS:", normalized in stats_by_title)
 
-        rows.append(
-            {
-                "job_id": job_id,
-                "title": job.get("title", "Untitled Role"),
-                "company": job.get("company", "Unknown"),
-                "location": job.get("location", "Unknown"),
-                "similarity": similarity,
-            }
-        )
+        row = {
+            "title": title,
+            "description": description,
+            "similarity": float(similarity) * 100,
 
-    # Sort descending by similarity
-    rows.sort(key=lambda r: r["similarity"], reverse=True)
-    return rows
+            "stats": {
+                "percent_of_db": raw_stats.get("Percent of Database"),
+                "frequency_rank": raw_stats.get("Frequency Rank"),
+                "avg_tenure_years": raw_stats.get("Avg Tenure (Years)"),
+                "median_tenure_years": raw_stats.get("Median Tenure (Years)"),
+                "top_transitions": raw_stats.get("Top Transitions"),
+                "industry": raw_stats.get("Industry"),
+                "growth_rate": raw_stats.get("Growth Rate"),
+            },
+
+        }
+
+
+        display_rows.append(row)
+
+    return display_rows

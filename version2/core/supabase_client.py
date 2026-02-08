@@ -14,9 +14,8 @@ This module is intentionally stateless and safe for multi-user use.
 from __future__ import annotations
 
 import logging
+import os
 from functools import lru_cache
-
-from infra.config import load_config
 
 try:
     from supabase import create_client, Client
@@ -35,24 +34,18 @@ def get_supabase_client() -> "Client":
     """
     Returns a singleton Supabase client instance.
 
-    Uses LRU cache to ensure:
-    - Only one client is created per process
-    - Thread-safe reuse
-    - No global mutable state
-
-    Returns:
-        supabase.Client
-    """
-    config = load_config()
-
-    url = config.get("supabase", {}).get("url")
-    key = config.get("supabase", {}).get("service_role_key")
-
-    if not url or not key:
-        raise ValueError(
-            "Supabase URL or service_role_key missing in settings.toml "
-            "under [supabase]"
+    Reads: 
+    - SUPABASE_URL 
+    - SUPABASE_SERVICE_ROLE_KEY 
+    """ 
+    url = os.getenv("SUPABASE_URL") 
+    key = os.getenv("SUPABASE_PUBLISHABLE_KEY") 
+    if not url or not key: 
+        raise ValueError( 
+            "Environment variables SUPABASE_URL and SUPABASE_PUBLISHABLE_KEY " 
+            "must be set." 
         )
+
 
     try:
         client = create_client(url, key)
@@ -66,13 +59,10 @@ def get_supabase_client() -> "Client":
 def test_connection() -> bool:
     """
     Simple connectivity test.
-
-    Returns:
-        bool: True if Supabase responds, False otherwise.
     """
     try:
         supabase = get_supabase_client()
-        response = supabase.table("jobs").select("*").limit(1).execute()
+        response = supabase.table("jobhop_raw").select("*").limit(1).execute()
         return response is not None
     except Exception as e:
         logger.error(f"Supabase connection test failed: {e}")

@@ -3,7 +3,7 @@ set -e
 
 echo "[run_prep] Running PREP pipeline..."
 
-# Optional: activate venv if you use one
-# source .venv/bin/activate
+# Always run from the directory where this script lives
+cd "$(dirname "$0")"
 
-python -m version2.prep.prep_runner
+python -m prep.prep_runner

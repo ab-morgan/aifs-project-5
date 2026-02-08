@@ -18,19 +18,19 @@ import streamlit as st
 from core.supabase_client import get_supabase_client
 
 
-@st.cache_data(show_spinner=False)
-def cached_jobs():
-    """Cache job metadata."""
-    supabase = get_supabase_client()
-    response = supabase.table("jobs").select("*").execute()
-    return response.data
+#@st.cache_data(show_spinner=False)
+#def cached_jobs():
+#    """Cache job metadata."""
+#    supabase = get_supabase_client()
+#    response = supabase.table("jobs").select("*").execute()
+#    return response.data
 
 
 @st.cache_data(show_spinner=False)
 def cached_embeddings():
     """Cache job embeddings."""
     supabase = get_supabase_client()
-    response = supabase.table("job_embeddings").select("*").execute()
+    response = supabase.table("jobhop_embeddings").select("*").execute()
     return response.data
 
 
@@ -38,6 +38,6 @@ def cached_embeddings():
 def cached_stats():
     """Cache global stats."""
     supabase = get_supabase_client()
-    response = supabase.table("job_stats").select("*").limit(1).execute()
-    data = getattr(response, "data", None) or response.get("data", [])
+    response = supabase.table("jobhop_stats").select("*").limit(1).execute()
+    data = getattr(response, "data", None) or []
     return data[0] if data else {}

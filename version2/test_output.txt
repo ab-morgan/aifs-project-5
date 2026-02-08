@@ -1,0 +1,88 @@
+============================= test session starts ==============================
+platform linux -- Python 3.12.1, pytest-9.0.2, pluggy-1.6.0
+rootdir: /workspaces/aifs-project-5/version2
+configfile: pytest.ini
+plugins: anyio-4.12.1
+collected 0 items / 7 errors
+
+==================================== ERRORS ====================================
+________________ ERROR collecting tests/test_embedding_model.py ________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_embedding_model.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_embedding_model.py:2: in <module>
+    from core.models.embedding_model import load_embedding_provider
+E   ModuleNotFoundError: No module named 'core'
+_________________ ERROR collecting tests/test_job_matching.py __________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_job_matching.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_job_matching.py:1: in <module>
+    from services.job_matching import prepare_job_matches
+E   ModuleNotFoundError: No module named 'services'
+_________________ ERROR collecting tests/test_prep_pipeline.py _________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_prep_pipeline.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_prep_pipeline.py:2: in <module>
+    from prep.prep_runner import run_prep
+E   ModuleNotFoundError: No module named 'prep'
+__________________ ERROR collecting tests/test_similarity.py ___________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_similarity.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_similarity.py:2: in <module>
+    from core.similarity import cosine_similarity, compute_top_k
+E   ModuleNotFoundError: No module named 'core'
+_________________ ERROR collecting tests/test_stats_service.py _________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_stats_service.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_stats_service.py:1: in <module>
+    from services.stats_service import load_stats_for_display
+E   ModuleNotFoundError: No module named 'services'
+_________________ ERROR collecting tests/test_text_cleaning.py _________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_text_cleaning.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_text_cleaning.py:1: in <module>
+    from core.utils.text_cleaning import clean_text
+E   ModuleNotFoundError: No module named 'core'
+___________________ ERROR collecting tests/test_tracking.py ____________________
+ImportError while importing test module '/workspaces/aifs-project-5/version2/tests/test_tracking.py'.
+Hint: make sure your test modules/packages have valid Python names.
+Traceback:
+/usr/local/python/3.12.1/lib/python3.12/importlib/__init__.py:90: in import_module
+    return _bootstrap._gcd_import(name[level:], package, level)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+tests/test_tracking.py:1: in <module>
+    from tracking.event_logger import log_event
+E   ModuleNotFoundError: No module named 'tracking'
+=========================== short test summary info ============================
+ERROR tests/test_embedding_model.py
+ERROR tests/test_job_matching.py
+ERROR tests/test_prep_pipeline.py
+ERROR tests/test_similarity.py
+ERROR tests/test_stats_service.py
+ERROR tests/test_text_cleaning.py
+ERROR tests/test_tracking.py
+!!!!!!!!!!!!!!!!!!! Interrupted: 7 errors during collection !!!!!!!!!!!!!!!!!!!!
+============================== 7 errors in 0.19s ===============================

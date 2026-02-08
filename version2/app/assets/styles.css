@@ -34,3 +34,15 @@ footer {
 #MainMenu {
     visibility: hidden;
 }
+
+/* Sidebar instructions styling */
+.sidebar-instructions {
+    padding: 8px 0;
+    font-size: 14px;
+    color: #444;
+    line-height: 1.4;
+}
+
+.sidebar-spacer {
+    height: 12px;
+}

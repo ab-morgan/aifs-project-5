@@ -10,7 +10,8 @@ import logging
 from typing import List
 
 import cohere
-from core.models.embedding_model import EmbeddingProvider
+from core.models.embedding_providers.base import EmbeddingProvider
+
 
 logger = logging.getLogger(__name__)
 

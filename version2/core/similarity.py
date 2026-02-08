@@ -20,6 +20,24 @@ from __future__ import annotations
 import numpy as np
 from typing import List, Dict, Any
 
+import json
+
+def parse_embedding(value):
+    """
+    Ensures embeddings loaded from Supabase are converted into
+    a list[float], even if stored as a JSON string.
+    """
+    if isinstance(value, list):
+        return value
+
+    if isinstance(value, str):
+        try:
+            return json.loads(value)
+        except json.JSONDecodeError:
+            raise ValueError(f"Invalid embedding string: {value[:50]}...")
+
+    raise TypeError(f"Unexpected embedding type: {type(value)}")
+
 
 def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
     """
@@ -40,34 +58,31 @@ def cosine_similarity(a: np.ndarray, b: np.ndarray) -> float:
 
 def compute_top_k(
     query_vector: List[float],
-    embeddings: List[Dict[str, Any]],
+    job_vectors: List[np.ndarray],
     top_k: int = 10,
-) -> List[Dict[str, Any]]:
+) -> List[Tuple[int, float]]:
     """
     Compute top-k most similar job embeddings.
 
     Args:
         query_vector (List[float]): Resume embedding
-        embeddings (List[Dict[str, Any]]): List of {job_id, embedding}
+        job_vectors (List[np.ndarray]): List of embedding vectors
         top_k (int): Number of results to return
 
     Returns:
-        List[Dict[str, Any]]: Sorted by similarity desc
+        List[Tuple[int, float]]: List of (index, similarity) sorted desc
     """
-    if not embeddings:
+    if not job_vectors:
         return []
 
     q = np.array(query_vector, dtype=float)
 
     sims = []
-    for row in embeddings:
-        job_id = row["job_id"]
-        vec = np.array(row["embedding"], dtype=float)
-
+    for idx, vec in enumerate(job_vectors):
         sim = cosine_similarity(q, vec)
-        sims.append({"job_id": job_id, "similarity": sim})
+        sims.append((idx, sim))
 
     # Sort descending by similarity
-    sims.sort(key=lambda x: x["similarity"], reverse=True)
+    sims.sort(key=lambda x: x[1], reverse=True)
 
     return sims[:top_k]

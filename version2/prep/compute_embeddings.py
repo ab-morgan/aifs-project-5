@@ -31,7 +31,7 @@ def _fetch_raw_jobs(supabase) -> List[Dict[str, Any]]:
         List of dicts with keys: id, title, description, etc.
     """
     try:
-        response = supabase.table("jobs").select("*").execute()
+        response = supabase.table("jobhop_raw").select("*").execute()
         data = getattr(response, "data", None) or response.get("data", [])
         logger.info(f"Fetched {len(data)} raw job records.")
         return data
@@ -51,7 +51,7 @@ def _upload_embeddings(supabase, rows: List[Dict[str, Any]]):
     Upload a batch of embeddings to Supabase.
     """
     try:
-        supabase.table("job_embeddings").insert(rows).execute()
+        supabase.table("jobhop_embeddings").insert(rows).execute()
     except Exception as e:
         logger.error(f"Failed to upload embeddings batch: {e}")
         raise

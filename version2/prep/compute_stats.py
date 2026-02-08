@@ -37,7 +37,7 @@ def _fetch_embeddings(supabase) -> List[Dict[str, Any]]:
         List of dicts with keys: job_id, embedding
     """
     try:
-        response = supabase.table("job_embeddings").select("*").execute()
+        response = supabase.table("jobhop_embeddings").select("*").execute()
         data = getattr(response, "data", None) or response.get("data", [])
         logger.info(f"Fetched {len(data)} embeddings.")
         return data
@@ -51,7 +51,7 @@ def _upload_stats(supabase, rows: List[Dict[str, Any]]):
     Upload computed stats to Supabase.
     """
     try:
-        supabase.table("job_stats").insert(rows).execute()
+        supabase.table("jobhop_stats").insert(rows).execute()
     except Exception as e:
         logger.error(f"Failed to upload stats batch: {e}")
         raise

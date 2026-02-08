@@ -31,23 +31,43 @@ def _read_uploaded_file(uploaded_file) -> str:
     return ""
 
 
-def render_sidebar(session_id: str) -> str:
-    st.sidebar.title("Resume Input")
+def render_sidebar(session_id):
+    st.sidebar.header("Resume Input")
 
-    st.sidebar.markdown(f"**Session ID:** `{session_id}`")
+    st.sidebar.markdown(
+        "<div class='sidebar-instructions'>"
+        "Upload a resume file or paste your resume text below."
+        "</div>",
+        unsafe_allow_html=True
+    )
 
-    uploaded = st.sidebar.file_uploader("Upload Resume (PDF or DOCX)", type=["pdf", "docx"])
-    resume_text = st.sidebar.text_area("Or paste your resume text here")
 
-    extracted_text = ""
-    if uploaded:
-        extracted_text = _read_uploaded_file(uploaded)
+    uploaded = st.sidebar.file_uploader("Upload Resume", type=["pdf", "docx", "txt"])
+    text_input = st.sidebar.text_area("Paste Resume Text", height=200)
 
-    final_text = extracted_text or resume_text
+    # ⭐ Add a real submit button
+    st.sidebar.markdown("<div class='sidebar-spacer'></div>", unsafe_allow_html=True)
+    submitted = st.sidebar.button("Submit Resume", type="primary")
 
-    if final_text:
-        st.sidebar.success("Resume loaded.")
-        return final_text
+    num_matches = st.sidebar.slider(
+        "Number of matches to display",
+        min_value=1,
+        max_value=50,
+        value=10,
+        step=1
+    )
 
-    st.sidebar.info("Upload a resume or paste text to begin.")
-    return ""
+    st.session_state["num_matches"] = num_matches
+
+
+    # Return only when the user actually clicks submit
+    if submitted:
+        if uploaded:
+            return uploaded
+        if text_input.strip():
+            return text_input
+
+        st.sidebar.warning("Please upload a file or paste text before submitting.")
+        return None
+
+    return None
