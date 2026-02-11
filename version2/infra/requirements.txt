@@ -14,6 +14,9 @@ streamlit
 python-docx
 PyPDF2
 
+# visualizations
+plotly=5.0
+
 # Supabase
 supabase
 

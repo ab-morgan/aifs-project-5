@@ -2,13 +2,13 @@
 stats_panel.py
 
 Displays global stats computed during the PREP phase.
+Chart-free version: all visualizations have moved to the analytics dashboard.
 """
 
 from __future__ import annotations
 
 import streamlit as st
 import pandas as pd
-import altair as alt
 
 
 def format_percent(val):
@@ -52,26 +52,21 @@ def render_stats_panel(stats_by_title):
         """)
 
     # ---------------------------------------------------------
-    # 📉 GLOBAL TENURE DISTRIBUTION
+    # 📉 GLOBAL TENURE DISTRIBUTION (TEXT-ONLY)
     # ---------------------------------------------------------
     with st.expander("📉 Global Tenure Distribution", expanded=False):
         tenure_vals = df["Avg Tenure (Years)"].dropna()
 
         if len(tenure_vals) > 0:
-            chart = (
-                alt.Chart(pd.DataFrame({"tenure": tenure_vals}))
-                .mark_bar()
-                .encode(
-                    x=alt.X("tenure:Q", bin=alt.Bin(maxbins=30), title="Tenure (Years)"),
-                    y=alt.Y("count()", title="Number of Job Titles"),
-                )
-            )
-            st.altair_chart(chart, width='stretch')
+            from services.visualization_service import make_global_tenure_histogram
+            fig = make_global_tenure_histogram(tenure_vals)
+            st.plotly_chart(fig, width='stretch')
         else:
             st.write("No tenure data available.")
 
+
     # ---------------------------------------------------------
-    # 🏆 TOP 10 LONGEST TENURE
+    # 🏆 TOP 10 LONGEST TENURE ROLES
     # ---------------------------------------------------------
     with st.expander("🏆 Top 10 Longest‑Tenure Roles", expanded=False):
         df2 = df.dropna(subset=["Avg Tenure (Years)"]).copy()
@@ -126,7 +121,7 @@ def render_stats_panel(stats_by_title):
             st.info("Growth rate data not available.")
 
     # ---------------------------------------------------------
-    # 🏭 INDUSTRY-LEVEL STATS
+    # 🏭 INDUSTRY-LEVEL STATS (TABLE-ONLY)
     # ---------------------------------------------------------
     with st.expander("🏭 Industry‑Level Stats", expanded=False):
         if "Industry" in df.columns:
@@ -150,25 +145,13 @@ def render_stats_panel(stats_by_title):
                 hide_index=True
             )
 
-            chart = (
-                alt.Chart(industry_summary.reset_index())
-                .mark_bar()
-                .encode(
-                    x=alt.X("Industry:N", sort="-y"),
-                    y=alt.Y("Count:Q"),
-                    tooltip=["Industry", "Count", "Percent of Database"]
-                )
-            )
-            st.altair_chart(chart, width='stretch')
-
         else:
             st.info("Industry data not available.")
-
 
     # ---------------------------------------------------------
     # 📚 BROWSE ALL JOB STATS
     # ---------------------------------------------------------
-    with st.expander("Browse All Job Stats"):
+    with st.expander("📚 Browse All Job Stats"):
 
         df_all = pd.DataFrame(stats_by_title.values())
 
@@ -193,12 +176,11 @@ def render_stats_panel(stats_by_title):
         if "Top Transitions" in df_all.columns:
             df_all["Top Transitions"] = df_all["Top Transitions"].apply(format_transitions)
 
-        # ⭐ CRITICAL FIX: convert ALL object columns to strings
+        # ⭐ Ensure all object columns are strings
         for col in df_all.columns:
             if df_all[col].dtype == "object":
                 df_all[col] = df_all[col].astype(str)
 
-        # Reset index to avoid any truncation behavior
         df_all = df_all.reset_index(drop=True)
 
         st.dataframe(

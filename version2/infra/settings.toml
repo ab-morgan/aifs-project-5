@@ -9,3 +9,9 @@ provider = "sentence_transformer"            # "openai" | "ollama" | "sentence_t
 model_name = "all-MiniLM-L6-v2"
 batch_size = 16         #8 to 32 is typical
 normalize = true
+
+
+[resume_extraction]
+provider = "groq"
+model = "llama-3.1-8b-instant"
+endpoint = "https://api.groq.com/openai/v1/chat/completions"

@@ -9,13 +9,17 @@ Responsibilities:
 - Accept resume text or file upload
 - Generate resume embedding
 - Perform similarity search
-- Display job matches and stats panels
+- Display job matches, stats panels, and analytics dashboard
 """
 
 from __future__ import annotations
 
 import sys
 import os
+from pathlib import Path
+import json
+import numpy as np
+import base64
 
 # Add repo root to Python path
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -23,13 +27,35 @@ V2_ROOT = os.path.abspath(os.path.join(APP_DIR, ".."))
 if V2_ROOT not in sys.path:
     sys.path.insert(0, V2_ROOT)
 
-
 import streamlit as st
 
 st.set_page_config(
     page_title="Resume Job Tracker",
-    page_icon="🔍"
+    page_icon="🔍",
+    layout="wide",
 )
+
+# -----------------------------------------
+# APP TITLE + LOGO
+# -----------------------------------------
+
+logo_path = Path(APP_DIR) / "assets" / "Copilot1.png"
+
+with open(logo_path, "rb") as f:
+    logo_bytes = f.read()
+logo_b64 = base64.b64encode(logo_bytes).decode()
+
+st.markdown(
+    f"""
+    <div class="app-logo">
+        <img src="data:image/png;base64,{logo_b64}" class="logo-img">
+    </div>
+    """,
+    unsafe_allow_html=True
+)
+
+st.markdown("<h1 style='text-align: center;'>CareerPivots</h1>", unsafe_allow_html=True)
+st.markdown("<h4 style='text-align: center; color: gray;'>Your resume-powered job discovery engine</h4>", unsafe_allow_html=True)
 
 from tracking.session import get_session_id
 from core.supabase_client import get_supabase_client
@@ -38,17 +64,17 @@ from core.utils.text_cleaning import clean_text
 from core.similarity import compute_top_k
 from services.job_matching import prepare_job_matches, normalize_title
 from services.stats_service import load_stats_for_display
+from services.prep_service import load_prep_data
+from infra.config import load_settings
+
 from app.components.sidebar import render_sidebar
 from app.components.job_match_panel import render_job_matches
 from app.components.stats_panel import render_stats_panel
 from app.components.dashboard_panel import render_dashboard_panel
-from pathlib import Path
-from infra.config import load_settings
+from app.components.analytics_dashboard import render_analytics_dashboard
 
-
-import json
-import numpy as np
-
+from services.resume_extraction_service import extract_experiences, ResumeExtractionError
+from services.experience_embedding_service import aggregate_experience_embeddings
 
 
 def parse_embedding(value):
@@ -57,6 +83,7 @@ def parse_embedding(value):
     if isinstance(value, str):
         return json.loads(value)
     raise TypeError(f"Unexpected embedding type: {type(value)}")
+
 
 def load_embeddings(supabase):
     """Load job embeddings + metadata from Supabase."""
@@ -70,11 +97,11 @@ def load_embeddings(supabase):
         emb = parse_embedding(row["embedding"])
         arr = np.array(emb, dtype=float)
 
-        # ⭐ CRITICAL FIX: pool 2D embeddings into a single vector
+        # Pool 2D embeddings into a single vector
         if arr.ndim == 2:
             arr = arr.mean(axis=0)
 
-        # ⭐ Ensure final shape is (384,)
+        # Ensure final shape is (384,)
         arr = arr.reshape(-1)
 
         vectors.append(arr)
@@ -86,9 +113,7 @@ def load_embeddings(supabase):
             "description": row.get("description"),
         })
 
-
     return vectors, jobs
-
 
 
 def inject_css():
@@ -98,73 +123,97 @@ def inject_css():
 
 
 def main():
-
-
+    # Load config ONCE
     if "config" not in st.session_state:
         st.session_state["config"] = load_settings()
 
-    #st.write("DEBUG AFTER CONFIG:", st.session_state.get("config"))
-
     config = st.session_state["config"]
 
-    st.set_page_config(page_title="Resume Matcher", layout="wide")
     inject_css()
 
     # Per-user session ID
     session_id = get_session_id()
 
+    # Optional tracking dashboard
     show_dashboard = st.sidebar.checkbox("Show Tracking Dashboard")
     if show_dashboard:
         render_dashboard_panel()
         st.stop()
-  
 
-    # Sidebar
-    user_input = render_sidebar(session_id=session_id)
-
-    # Load data
+    # Core data load (shared across tabs)
     supabase = get_supabase_client()
-    #jobs = load_jobs(supabase)
     vectors, jobs = load_embeddings(supabase)
-
     stats_by_title = load_stats_for_display(supabase)
 
+    # Top-level navigation
+    main_tab, stats_tab, analytics_tab = st.tabs([
+        "Resume Matching",
+        "Job Market Statistics",
+        "Analytics Dashboard",
+    ])
 
-    # Display stats panel
-    render_stats_panel(stats_by_title)
-
-    # If user provided resume text or file
-    if user_input:
-
-
-        # Initialize config if missing
-        if "config" not in st.session_state:
-            st.session_state["config"] = {
-                "provider": "supabase",
-                "embedding_model": "text-embedding-3-small",
-                "normalize": True,
-                "batch_size": 128,
-            }
+    # -----------------------------------------
+    # TAB 1: RESUME MATCHING
+    # -----------------------------------------
+    with main_tab:
+        user_input = render_sidebar(session_id=session_id)
+        if "has_run_matching" not in st.session_state:
+            st.session_state["has_run_matching"] = False
 
 
+        if user_input:
+            embedding_provider = load_embedding_provider(config)
+            cleaned = clean_text(user_input)
 
-        provider = load_embedding_provider(st.session_state["config"])
-        cleaned = clean_text(user_input)
-        resume_vector = provider.embed(cleaned)
+            with st.spinner("Parsing your resume into experiences..."):
+                try:
+                    experiences = extract_experiences(cleaned, config.resume_extraction)
+                except ResumeExtractionError as e:
+                    st.error(f"Error parsing resume: {e}")
+                    st.stop()
 
-        # Compute similarity
-        matches = compute_top_k(
-            resume_vector,
-            vectors,
-            top_k=10,
-        )
+            # Store experiences so job_match_panel can access them
+            st.session_state["experiences"] = experiences
 
-        # Prepare display rows
-        display_rows = prepare_job_matches(matches, jobs, stats_by_title)
+            with st.spinner("Embedding your experiences..."):
+                try:
+                    resume_vector = aggregate_experience_embeddings(
+                        experiences,
+                        embedding_provider,
+                    )
+                except ValueError as e:
+                    st.error(f"Could not embed experiences: {e}")
+                    st.stop()
 
-        # Render results
-        render_job_matches(display_rows, st.session_state["num_matches"])
+            matches = compute_top_k(resume_vector, vectors, top_k=10)
 
+            with st.expander("See how your resume was parsed"):
+                st.json(experiences)
+
+            # ✅ Store results in session_state instead of passing into the panel
+            st.session_state["job_match_results"] = prepare_job_matches(
+                matches, jobs, stats_by_title
+            )
+            st.session_state["has_run_matching"] = True
+
+        # ✅ Panel is now read-only: it pulls from session_state
+        render_job_matches(num_matches=10)
+
+    # -----------------------------------------
+    # TAB 2: JOB MARKET STATISTICS
+    # -----------------------------------------
+    with stats_tab:
+        render_stats_panel(stats_by_title)
+
+    # -----------------------------------------
+    # TAB 3: ANALYTICS DASHBOARD
+    # -----------------------------------------
+    with analytics_tab:
+        if "prep" not in st.session_state:
+            st.session_state["prep"] = load_prep_data()
+
+        prep = st.session_state["prep"]
+        render_analytics_dashboard(prep)
 
 
 if __name__ == "__main__":

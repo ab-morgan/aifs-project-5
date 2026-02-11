@@ -7,18 +7,41 @@ Displays job match results in a clean, readable format.
 from __future__ import annotations
 
 import streamlit as st
-import pandas as pd
-import altair as alt
+from services.match_explanation_service import explain_match, MatchExplanationError
 
-def render_job_matches(rows, num_matches):
+
+def render_job_matches(num_matches=10):
     st.header("Top Job Matches")
 
-    if not rows:
-        st.info("No matches found.")
+    # -----------------------------
+    # Clear Results button
+    # -----------------------------
+    if st.button("Clear Results"):
+        st.session_state.pop("job_match_results", None)
+        st.session_state["has_run_matching"] = False
+        st.rerun()
+
+    # -----------------------------
+    # If user has never run matching, show nothing
+    # -----------------------------
+    if not st.session_state.get("has_run_matching", False):
         return
 
+    # -----------------------------
+    # Load results from session_state
+    # -----------------------------
+    rows = st.session_state.get("job_match_results")
+
+    # If user HAS run matching but results are empty
+    if not rows:
+        st.info("No matches found. Upload a resume and generate matches to see results here.")
+        return
+
+    # -----------------------------
+    # Render each job match
+    # -----------------------------
     for i, row in enumerate(rows[:num_matches], start=1):
-        #with st.expander(f"{i}. {row['title']} — Match Score: {row['similarity']:.1f}%"):
+
         title = row["title"]
         similarity = row["similarity"]
         description = row.get("description", "No description available.")
@@ -42,13 +65,25 @@ def render_job_matches(rows, num_matches):
             st.markdown(f"### {title}")
             st.markdown(f"**Job Description:** {description}")
 
-            st.markdown("---")
+            # ---------------------------
+            # LLM Match Explanation
+            # ---------------------------
+            if "experiences" in st.session_state:
+                with st.expander("Why this job matches your experience"):
+                    try:
+                        explanation = explain_match(
+                            st.session_state["experiences"],
+                            row,
+                            st.session_state["config"].resume_extraction
+                        )
+                        st.write(explanation)
+                    except MatchExplanationError as e:
+                        st.write(f"Could not generate explanation: {e}")
 
             # ---------------------------
             # Job Statistics
             # ---------------------------
             st.markdown("### 📊 Job Insights")
-
             st.markdown(f"""
             - **Percent of Database:** {pct_display}  
             - **Frequency Rank:** {freq_display}  
@@ -57,7 +92,6 @@ def render_job_matches(rows, num_matches):
             """)
 
             top_transitions = stats.get("top_transitions") or []
-
             if top_transitions:
                 st.markdown("**Top Transitions:**")
                 for t in top_transitions[:3]:
@@ -65,9 +99,8 @@ def render_job_matches(rows, num_matches):
             else:
                 st.markdown("**Top Transitions:** N/A")
 
-
             # ---------------------------
-            # Match Explanation (optional)
+            # Keyword-based Explanation
             # ---------------------------
             explanation = row.get("explanation")
             if explanation:
@@ -75,15 +108,13 @@ def render_job_matches(rows, num_matches):
                     st.write(f"**Similarity Score:** {explanation['similarity']:.3f}")
                     st.write(f"**Keyword Overlap:** {explanation['overlap_count']} words")
                     st.write(f"**Missing Keywords:** {explanation['missing_count']} words")
-
                     st.write("**Top Overlapping Keywords:**")
                     st.write(", ".join(explanation["top_overlap"]))
-
                     st.write("**Top Missing Keywords:**")
                     st.write(", ".join(explanation["top_missing"]))
 
             # ---------------------------
-            # Skill Gaps (optional)
+            # Skill Gaps
             # ---------------------------
             skill_gaps = row.get("skill_gaps")
             if skill_gaps:

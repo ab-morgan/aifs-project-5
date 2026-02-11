@@ -46,3 +46,14 @@ footer {
 .sidebar-spacer {
     height: 12px;
 }
+
+
+.app-logo {
+    text-align: center;
+    margin-top: -20px;
+    margin-bottom: -10px;
+}
+
+.app-logo img {
+    width: 250px;
+}

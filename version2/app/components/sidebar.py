@@ -52,7 +52,7 @@ def render_sidebar(session_id):
     num_matches = st.sidebar.slider(
         "Number of matches to display",
         min_value=1,
-        max_value=50,
+        max_value=20,
         value=10,
         step=1
     )
