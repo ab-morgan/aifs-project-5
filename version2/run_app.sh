@@ -7,4 +7,4 @@ echo "[run_app] Starting Streamlit app..."
 cd "$(dirname "$0")/.."
 
 # Launch the Streamlit app
-python -m streamlit run version2/app/app.py
+python -m streamlit run version2/app/app.py --server.port 8300
