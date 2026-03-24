@@ -1,3 +1,5 @@
+## For the demo app, use the requirements file under at app/infra/requirements.txt
+
 streamlit>=1.32
 numpy>=1.26
 supabase>=2.4
