@@ -125,6 +125,9 @@ def inject_css():
 def main():
     # Load config ONCE
     if "config" not in st.session_state:
+        from dotenv import load_dotenv
+        load_dotenv()
+
         st.session_state["config"] = load_settings()
 
     config = st.session_state["config"]

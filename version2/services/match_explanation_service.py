@@ -1,12 +1,19 @@
 from __future__ import annotations
 import os
 import json
+import time
 import requests
 from typing import Dict, Any, List
 from infra.config import ResumeExtractionConfig
 
+_MAX_RETRIES = 4
+_RETRY_DELAY = 1.0  # seconds; Groq rate limit resets within 1s
+
 
 class MatchExplanationError(Exception):
+    pass
+
+class MatchExplanationRateLimitError(MatchExplanationError):
     pass
 
 
@@ -58,7 +65,14 @@ def explain_match(
         "temperature": 0.2,
     }
 
-    resp = requests.post(cfg.endpoint, headers=headers, json=payload, timeout=60)
+    resp = None
+    for attempt in range(_MAX_RETRIES):
+        resp = requests.post(cfg.endpoint, headers=headers, json=payload, timeout=60)
+        if resp.status_code != 429:
+            break
+        time.sleep(_RETRY_DELAY)
+    if resp.status_code == 429:
+        raise MatchExplanationRateLimitError("Rate limit exceeded after retries")
     if resp.status_code != 200:
         raise MatchExplanationError(
             f"Groq API error {resp.status_code}: {resp.text[:500]}"
