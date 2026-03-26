@@ -104,10 +104,17 @@ def render_job_matches(num_matches=10):
     if "selected_match_indices" not in st.session_state:
         st.session_state["selected_match_indices"] = set()
 
+    # Recompute selected set from checkbox widget values so the count
+    # is always current on the same render pass (avoids off-by-one).
+    selected_indices = {
+        idx for idx in range(len(rows[:num_matches]))
+        if st.session_state.get(f"select_match_{idx + 1}", False)
+    }
+    st.session_state["selected_match_indices"] = selected_indices
+
     # -----------------------------
     # Print / Export section
     # -----------------------------
-    selected_indices = st.session_state["selected_match_indices"]
     if selected_indices:
         st.markdown(f"**{len(selected_indices)} match(es) selected for export.**")
         selected_rows = []
@@ -155,12 +162,8 @@ def render_job_matches(num_matches=10):
             # ---------------------------
             # Select for export
             # ---------------------------
-            is_selected = idx in st.session_state["selected_match_indices"]
-            checked = st.checkbox("Include in export", value=is_selected, key=f"select_match_{i}")
-            if checked:
-                st.session_state["selected_match_indices"].add(idx)
-            else:
-                st.session_state["selected_match_indices"].discard(idx)
+            is_selected = idx in selected_indices
+            st.checkbox("Include in export", value=is_selected, key=f"select_match_{i}")
 
             # ---------------------------
             # Job Title + Description

@@ -17,4 +17,5 @@ venv/
 # Streamlit cache
 .streamlit/
 
+# Secrets and Enviroment variables
 .env
