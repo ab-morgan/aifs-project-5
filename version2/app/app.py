@@ -30,32 +30,19 @@ if V2_ROOT not in sys.path:
 import streamlit as st
 
 st.set_page_config(
-    page_title="Resume Job Tracker",
-    page_icon="🔍",
+    page_title="CareerPivots",
+    page_icon="🎯",
     layout="wide",
 )
 
 # -----------------------------------------
-# APP TITLE + LOGO
+# APP TITLE + LOGO (rendered inside main after config loads)
 # -----------------------------------------
 
 logo_path = Path(APP_DIR) / "assets" / "Copilot1.png"
-
 with open(logo_path, "rb") as f:
     logo_bytes = f.read()
-logo_b64 = base64.b64encode(logo_bytes).decode()
-
-st.markdown(
-    f"""
-    <div class="app-logo">
-        <img src="data:image/png;base64,{logo_b64}" class="logo-img">
-    </div>
-    """,
-    unsafe_allow_html=True
-)
-
-st.markdown("<h1 style='text-align: center;'>CareerPivots</h1>", unsafe_allow_html=True)
-st.markdown("<h4 style='text-align: center; color: gray;'>Your resume-powered job discovery engine</h4>", unsafe_allow_html=True)
+_LOGO_B64 = base64.b64encode(logo_bytes).decode()
 
 from tracking.session import get_session_id
 from core.supabase_client import get_supabase_client
@@ -72,6 +59,7 @@ from app.components.job_match_panel import render_job_matches
 from app.components.stats_panel import render_stats_panel
 from app.components.dashboard_panel import render_dashboard_panel
 from app.components.analytics_dashboard import render_analytics_dashboard
+from app.components.onet_wizard import render_onet_wizard
 
 from services.resume_extraction_service import extract_experiences, ResumeExtractionError
 from services.experience_embedding_service import aggregate_experience_embeddings
@@ -117,9 +105,33 @@ def load_embeddings(supabase):
 
 
 def inject_css():
+    ui = st.session_state.get("config").ui if "config" in st.session_state else None
     css_path = Path(__file__).parent / "assets" / "styles.css"
-    if css_path.exists():
-        st.markdown(f"<style>{css_path.read_text()}</style>", unsafe_allow_html=True)
+    base_css = css_path.read_text() if css_path.exists() else ""
+
+    # Inject config-driven CSS variables
+    if ui:
+        dynamic_css = f"""
+:root {{
+    --bg-color: {ui.background_color};
+    --card-bg: {ui.card_background_color};
+    --accent: {ui.accent_color};
+    --header-color: {ui.header_text_color};
+    --body-color: {ui.body_text_color};
+    --muted-color: {ui.muted_text_color};
+    --header-font-size: {ui.header_font_size_rem}rem;
+    --body-font-size: {ui.body_font_size_rem}rem;
+    --card-title-font-size: {ui.card_title_font_size_rem}rem;
+    --insight-value-font-size: {ui.insight_value_font_size_rem}rem;
+    --sidebar-font-size: {ui.sidebar_font_size_rem}rem;
+    --logo-size: {ui.logo_size_px}px;
+}}
+.stApp {{ background-color: var(--bg-color); }}
+"""
+    else:
+        dynamic_css = ""
+
+    st.markdown(f"<style>{dynamic_css}{base_css}</style>", unsafe_allow_html=True)
 
 
 def main():
@@ -133,6 +145,21 @@ def main():
     config = st.session_state["config"]
 
     inject_css()
+
+    # Render header using config values
+    ui = config.ui
+    st.markdown(
+        f"""
+        <div class="app-header">
+            <img src="data:image/png;base64,{_LOGO_B64}"
+                 style="width:{ui.logo_size_px}px;height:{ui.logo_size_px}px;">
+            <h1 style="font-size:{ui.header_font_size_rem}rem;color:{ui.header_text_color};">
+                {ui.app_name}
+            </h1>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # Per-user session ID
     session_id = get_session_id()
@@ -156,13 +183,18 @@ def main():
     ])
 
     # -----------------------------------------
+    # O*NET WIZARD (modal dialog)
+    # -----------------------------------------
+    if st.session_state.get("show_onet"):
+        render_onet_wizard()
+
+    # -----------------------------------------
     # TAB 1: RESUME MATCHING
     # -----------------------------------------
     with main_tab:
         user_input = render_sidebar(session_id=session_id)
         if "has_run_matching" not in st.session_state:
             st.session_state["has_run_matching"] = False
-
 
         if user_input:
             embedding_provider = load_embedding_provider(config)
@@ -175,7 +207,6 @@ def main():
                     st.error(f"Error parsing resume: {e}")
                     st.stop()
 
-            # Store experiences so job_match_panel can access them
             st.session_state["experiences"] = experiences
 
             with st.spinner("Embedding your experiences..."):
@@ -188,19 +219,16 @@ def main():
                     st.error(f"Could not embed experiences: {e}")
                     st.stop()
 
-            matches = compute_top_k(resume_vector, vectors, top_k=10)
+            num_matches = st.session_state.get("num_matches", 10)
+            matches = compute_top_k(resume_vector, vectors, top_k=num_matches)
 
-            with st.expander("See how your resume was parsed"):
-                st.json(experiences)
-
-            # ✅ Store results in session_state instead of passing into the panel
             st.session_state["job_match_results"] = prepare_job_matches(
                 matches, jobs, stats_by_title
             )
             st.session_state["has_run_matching"] = True
 
-        # ✅ Panel is now read-only: it pulls from session_state
-        render_job_matches(num_matches=10)
+        num_matches = st.session_state.get("num_matches", 10)
+        render_job_matches(num_matches=num_matches)
 
     # -----------------------------------------
     # TAB 2: JOB MARKET STATISTICS
