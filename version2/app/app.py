@@ -246,6 +246,27 @@ def main():
         prep = st.session_state["prep"]
         render_analytics_dashboard(prep)
 
+    # -----------------------------------------
+    # FOOTER
+    # -----------------------------------------
+    st.markdown(
+        """
+        <div style="margin-top: 3rem; padding: 1.5rem 0 1rem; border-top: 1px solid #e5e7eb; text-align: center;">
+            <p style="text-align: center">
+                <a href="https://services.onetcenter.org/" title="This site incorporates information from O*NET Web Services. Click to learn more.">
+                    <img src="https://www.onetcenter.org/image/link/onet-in-it.svg" style="width: 130px; height: 60px; border: none" alt="O*NET in-it">
+                </a>
+            </p>
+            <p style="font-size: 0.82rem; color: #888; max-width: 600px; margin: 0 auto;">
+                This site incorporates information from <a href="https://services.onetcenter.org/" style="color: #14b8a6;">O*NET Web Services</a>
+                by the U.S. Department of Labor, Employment and Training Administration (USDOL/ETA).
+                O*NET&reg; is a trademark of USDOL/ETA.
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
 
 if __name__ == "__main__":
     main()
