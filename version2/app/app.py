@@ -27,6 +27,12 @@ V2_ROOT = os.path.abspath(os.path.join(APP_DIR, ".."))
 if V2_ROOT not in sys.path:
     sys.path.insert(0, V2_ROOT)
 
+# Configure logging BEFORE any other imports so third-party libs
+# don't add their own handlers first.
+from core.utils.logging import configure_logging, get_logger
+configure_logging()
+_log = get_logger(__name__)
+
 import streamlit as st
 
 st.set_page_config(
@@ -135,11 +141,10 @@ def inject_css():
 
 
 def main():
-    # Load config ONCE
-    if "config" not in st.session_state:
+    # Load config ONCE — force reload if the cached object is stale (missing ui)
+    if "config" not in st.session_state or not hasattr(st.session_state["config"], "ui"):
         from dotenv import load_dotenv
         load_dotenv()
-
         st.session_state["config"] = load_settings()
 
     config = st.session_state["config"]
@@ -171,9 +176,14 @@ def main():
         st.stop()
 
     # Core data load (shared across tabs)
-    supabase = get_supabase_client()
-    vectors, jobs = load_embeddings(supabase)
-    stats_by_title = load_stats_for_display(supabase)
+    try:
+        supabase = get_supabase_client()
+        vectors, jobs = load_embeddings(supabase)
+        stats_by_title = load_stats_for_display(supabase)
+    except Exception as e:
+        _log.error("Failed to load data from Supabase", exc_info=True)
+        st.error("Could not connect to the database. Check the log for details.")
+        st.stop()
 
     # Top-level navigation
     main_tab, stats_tab, analytics_tab = st.tabs([
@@ -197,35 +207,38 @@ def main():
             st.session_state["has_run_matching"] = False
 
         if user_input:
-            embedding_provider = load_embedding_provider(config)
-            cleaned = clean_text(user_input)
+            try:
+                embedding_provider = load_embedding_provider(config)
+                cleaned = clean_text(user_input)
 
-            with st.spinner("Parsing your resume into experiences..."):
-                try:
+                with st.spinner("Parsing your resume into experiences..."):
                     experiences = extract_experiences(cleaned, config.resume_extraction)
-                except ResumeExtractionError as e:
-                    st.error(f"Error parsing resume: {e}")
-                    st.stop()
 
-            st.session_state["experiences"] = experiences
+                st.session_state["experiences"] = experiences
 
-            with st.spinner("Embedding your experiences..."):
-                try:
+                with st.spinner("Embedding your experiences..."):
                     resume_vector = aggregate_experience_embeddings(
                         experiences,
                         embedding_provider,
                     )
-                except ValueError as e:
-                    st.error(f"Could not embed experiences: {e}")
-                    st.stop()
 
-            num_matches = st.session_state.get("num_matches", 10)
-            matches = compute_top_k(resume_vector, vectors, top_k=num_matches)
+                num_matches = st.session_state.get("num_matches", 10)
+                matches = compute_top_k(resume_vector, vectors, top_k=num_matches)
 
-            st.session_state["job_match_results"] = prepare_job_matches(
-                matches, jobs, stats_by_title
-            )
-            st.session_state["has_run_matching"] = True
+                st.session_state["job_match_results"] = prepare_job_matches(
+                    matches, jobs, stats_by_title
+                )
+                st.session_state["has_run_matching"] = True
+
+            except ResumeExtractionError as e:
+                _log.error("Resume extraction failed", exc_info=True)
+                st.error("Could not parse your resume. Please try again or paste the text directly.")
+            except ValueError as e:
+                _log.error("Embedding failed", exc_info=True)
+                st.error("Could not process your resume. Check the log for details.")
+            except Exception as e:
+                _log.error("Unexpected error during matching", exc_info=True)
+                st.error("Something went wrong. Check the log for details.")
 
         num_matches = st.session_state.get("num_matches", 10)
         render_job_matches(num_matches=num_matches)

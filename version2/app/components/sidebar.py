@@ -34,7 +34,15 @@ def render_sidebar(session_id: str):
 
     # ── Resume ──────────────────────────────────────────
     sb.markdown('<div class="sidebar-section-label">Resume</div>', unsafe_allow_html=True)
-    uploaded = sb.file_uploader("", type=["pdf", "docx", "txt"], label_visibility="collapsed")
+    uploaded = sb.file_uploader("Upload a file (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"], label_visibility="visible")
+    sb.caption("Or paste your resume text below")
+    pasted = sb.text_area(
+        "",
+        key="resume_text_input",
+        placeholder="Paste resume text here…",
+        height=160,
+        label_visibility="collapsed",
+    )
 
     # ── Interest Profile ─────────────────────────────────
     sb.markdown('<div class="sidebar-section-label">Interest Profile</div>', unsafe_allow_html=True)
@@ -100,12 +108,17 @@ def render_sidebar(session_id: str):
 
     # ── Return resume text on submit ─────────────────────
     if submitted:
+        # File upload takes priority over pasted text
         if uploaded:
             text = _read_uploaded_file(uploaded)
             if text.strip():
                 st.session_state["preferences"] = preferences
                 st.session_state["exclusions"] = exclusions
                 return text
-        sb.warning("Please upload a resume file before finding matches.")
+        if pasted.strip():
+            st.session_state["preferences"] = preferences
+            st.session_state["exclusions"] = exclusions
+            return pasted.strip()
+        sb.warning("Please upload a file or paste your resume text before finding matches.")
 
     return None
