@@ -94,3 +94,17 @@ repo root/
 - The active environment is set by `APP_ENV` env var (`dev` or `prod`). Use `config.is_dev` / `config.is_prod` in code.
 - Resume input is sanitized (control chars stripped) before any processing.
 - The O*NET attribution footer must remain visible in the app at all times (terms of service requirement).
+
+## Prep → App Workflow
+
+**Run `make prep` before starting the app for the first time, and after any job data update.**
+
+1. `make prep` → computes embeddings + stats → stores in Supabase
+2. `make dev` or `make prod` → app starts, loads data from Supabase into process-level cache on first request
+3. All users served from cache — Supabase not queried again until process restarts
+
+The prep pipeline is idempotent: it skips steps where data already exists.
+Use `make prep-force` to recompute everything.
+
+Static job data (embeddings, stats) lives in `core/cache.py`'s `_GLOBAL_CACHE` dict via `prep_service.py`.
+Dynamic per-user data (resume embeddings, match results) lives in Streamlit `session_state`.

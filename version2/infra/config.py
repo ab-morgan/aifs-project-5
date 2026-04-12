@@ -120,6 +120,13 @@ class LimitsConfig(BaseModel):
         return v
 
 
+class PrepConfig(BaseModel):
+    log_level: str = "error"
+    batch_size: int = 16
+    skip_if_exists: bool = True
+    source_table: str = "jobhop_raw"
+
+
 class AppConfig(BaseModel):
     app_env: AppEnvConfig = AppEnvConfig()
     server: ServerConfig = ServerConfig()
@@ -128,6 +135,7 @@ class AppConfig(BaseModel):
     resume_extraction: ResumeExtractionConfig
     ui: UIConfig = UIConfig()
     limits: LimitsConfig = LimitsConfig()
+    prep: PrepConfig = PrepConfig()
 
     @property
     def is_dev(self) -> bool:
@@ -192,4 +200,5 @@ def load_settings(path: str | None = None) -> AppConfig:
         resume_extraction=ResumeExtractionConfig(**data["resume_extraction"]),
         ui=UIConfig(**data["ui"]) if "ui" in data else UIConfig(),
         limits=LimitsConfig(**data["limits"]) if "limits" in data else LimitsConfig(),
+        prep=PrepConfig(**data["prep"]) if "prep" in data else PrepConfig(),
     )

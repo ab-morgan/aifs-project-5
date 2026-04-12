@@ -34,9 +34,9 @@ def get_supabase_client() -> "Client":
     """
     Returns a singleton Supabase client instance.
 
-    Reads: 
-    - SUPABASE_URL 
-    - SUPABASE_SERVICE_ROLE_KEY 
+    Reads:
+    - SUPABASE_URL
+    - SUPABASE_PUBLISHABLE_KEY (anon/public key)
     """ 
     url = os.getenv("SUPABASE_URL") 
     key = os.getenv("SUPABASE_PUBLISHABLE_KEY") 

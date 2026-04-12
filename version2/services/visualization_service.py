@@ -7,6 +7,7 @@ Sankey diagrams, histograms, bar charts, and future analytics visuals.
 
 from __future__ import annotations
 from typing import List
+import streamlit as st
 import plotly.graph_objects as go
 import plotly.express as px
 

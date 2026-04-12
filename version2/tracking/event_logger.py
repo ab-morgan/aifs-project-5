@@ -12,11 +12,11 @@ Events follow the schema defined in version2/schemas/event.py:
 
 from __future__ import annotations
 
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Dict, Any
 
-from version2.schemas.event import Event
-from version2.tracking.supabase_logger import write_event
+from schemas.event import Event
+from tracking.supabase_logger import write_event
 
 
 def log_event(session_id: str, event_type: str, payload: Dict[str, Any]) -> None:
@@ -31,7 +31,7 @@ def log_event(session_id: str, event_type: str, payload: Dict[str, Any]) -> None
     event = Event(
         session_id=session_id,
         event_type=event_type,
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(timezone.utc),
         payload=payload,
     )
 

@@ -16,3 +16,11 @@ max_upload_mb = 5
 [server]
 port = 8501
 log_level = "error"         # errors only in production
+
+[prep]
+# Prod prep settings — points at the production Supabase project.
+# Uses full batch size and strict skip logic to avoid accidental rewrites.
+log_level = "error"         # errors only — no verbose output in production
+batch_size = 16             # full batch size for throughput
+skip_if_exists = true       # never overwrite existing prod embeddings unless --force
+source_table = "jobhop_raw" # raw job data table to embed

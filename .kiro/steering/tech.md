@@ -52,13 +52,54 @@
 ## Common Commands
 
 ```bash
-make dev       # Start app in development mode (port 8300, debug logging)
-make prod      # Start app in production mode (port 8501, errors only)
-make prep      # Run the embedding prep pipeline
-make test      # Run pytest (single pass)
-make lint      # Run ruff linter
-make help      # List all targets
+# ── Typical dev startup sequence ─────────────────────────────────────────
+make prep-dev    # STEP 1: compute embeddings + stats into dev Supabase
+make dev         # STEP 2: start app in dev mode (port 8300, debug logging)
+
+# ── Typical prod startup sequence ────────────────────────────────────────
+make prep-prod   # STEP 1: compute embeddings + stats into prod Supabase
+make prod        # STEP 2: start app in prod mode (port 8501, errors only)
+
+# ── Force recompute (after job data changes) ──────────────────────────────
+make prep-dev-force   # recompute all dev embeddings + stats
+make prep-prod-force  # recompute all prod embeddings + stats
+
+# ── Other targets ─────────────────────────────────────────────────────────
+make test        # Run pytest (all external services mocked — no keys needed)
+make test-prep   # Run only the prep pipeline tests
+make lint        # Run ruff linter
+make help        # List all targets with descriptions
 ```
+
+## Prep → App Workflow
+
+The system has two distinct phases:
+
+### Phase 1 — Prep (run once, offline)
+`make prep-dev` or `make prep-prod` runs `version2/prep/prep_runner.py` which:
+1. Reads `[prep]` config from `settings.<env>.toml` (batch size, skip logic, source table)
+2. Verifies Supabase connectivity and required tables
+3. Fetches raw job data from `jobhop_raw`
+4. Computes embeddings via the configured provider → stores in `jobhop_embeddings`
+5. Computes per-title statistics (count, tenure, transitions, etc.) → stores in `jobhop_stats`
+
+Dev prep uses smaller batches and verbose logging. Prod prep uses full batches and errors-only logging.
+Both are **idempotent** — they skip steps where data already exists.
+Use `make prep-dev-force` / `make prep-prod-force` to recompute everything from scratch.
+
+### Phase 2 — Runtime (app serving users)
+`make dev` / `make prod` starts the Streamlit app. On first request:
+- `prep_service.load_embeddings_cached()` fetches embeddings from Supabase → stores in process-level cache (`core/cache.py`)
+- `prep_service.load_stats_cached()` fetches stats from Supabase → stores in process-level cache
+
+All subsequent users are served from the in-process cache — Supabase is **not queried again** until the process restarts. This means:
+- Fast response for all users after the first load
+- No repeated database queries for static job data
+- Cache survives across Streamlit sessions on the same server process
+
+If the app starts and finds no embeddings (prep hasn't been run), it displays a warning and stops.
+
+To refresh the cache after re-running prep, restart the app process.
 
 ## Environment System
 

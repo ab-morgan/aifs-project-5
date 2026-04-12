@@ -16,3 +16,11 @@ max_upload_mb = 10
 [server]
 port = 8300
 log_level = "debug"         # verbose Streamlit + app logging in dev
+
+[prep]
+# Dev prep settings — points at a dev/staging Supabase project.
+# Use a small subset of job data for fast iteration.
+log_level = "debug"         # verbose prep output in dev
+batch_size = 8              # small batches — faster feedback, easier to debug
+skip_if_exists = true       # don't recompute if embeddings already present
+source_table = "jobhop_raw" # raw job data table to embed

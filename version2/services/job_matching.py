@@ -31,8 +31,6 @@ def prepare_job_matches(matches, jobs, stats_by_title):
 
         raw_stats = stats_by_title.get(normalized, {})
 
-        # print("TITLE:", title, "NORMALIZED:", normalized, "HAS_STATS:", normalized in stats_by_title)
-
         row = {
             "title": title,
             "description": description,

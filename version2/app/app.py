@@ -17,9 +17,8 @@ from __future__ import annotations
 import sys
 import os
 from pathlib import Path
-import json
-import numpy as np
 import base64
+import numpy as np
 
 # Add repo root to Python path
 APP_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -43,22 +42,35 @@ st.set_page_config(
 )
 
 # -----------------------------------------
-# APP TITLE + LOGO (rendered inside main after config loads)
+# APP TITLE + LOGO
+# Loaded at module level but with a safe fallback so a missing logo
+# file produces a clear error message rather than a crash.
 # -----------------------------------------
 
-logo_path = Path(APP_DIR) / "assets" / "Copilot1.png"
-with open(logo_path, "rb") as f:
-    logo_bytes = f.read()
-_LOGO_B64 = base64.b64encode(logo_bytes).decode()
+def _load_logo_b64() -> str | None:
+    logo_path = Path(APP_DIR) / "assets" / "Copilot1.png"
+    if not logo_path.exists():
+        _log.error(
+            "Logo file not found: %s — the app header will show text only. "
+            "To fix, add Copilot1.png to version2/app/assets/.",
+            logo_path,
+        )
+        return None
+    try:
+        return base64.b64encode(logo_path.read_bytes()).decode()
+    except Exception as e:
+        _log.error("Could not read logo file %s: %s", logo_path, e)
+        return None
+
+_LOGO_B64 = _load_logo_b64()
 
 from tracking.session import get_session_id
 from core.supabase_client import get_supabase_client
 from core.models.embedding_model import load_embedding_provider
 from core.utils.text_cleaning import clean_text
 from core.similarity import compute_top_k
-from services.job_matching import prepare_job_matches, normalize_title
-from services.stats_service import load_stats_for_display
-from services.prep_service import load_prep_data
+from services.job_matching import prepare_job_matches
+from services.prep_service import load_embeddings_cached, load_prep_data, load_stats_cached
 from infra.config import load_settings
 
 from app.components.sidebar import render_sidebar
@@ -70,47 +82,6 @@ from app.components.onet_wizard import render_onet_wizard
 
 from services.resume_extraction_service import extract_experiences, ResumeExtractionError
 from services.experience_embedding_service import aggregate_experience_embeddings
-
-
-def parse_embedding(value):
-    if isinstance(value, list):
-        return value
-    if isinstance(value, str):
-        return json.loads(value)
-    raise TypeError(f"Unexpected embedding type: {type(value)}")
-
-
-def load_embeddings(supabase):
-    """Load job embeddings + metadata from Supabase."""
-    response = supabase.table("jobhop_embeddings").select("*").limit(None).execute()
-    rows = response.data
-
-    vectors = []
-    jobs = []
-
-    for row in rows:
-        try:
-            emb = parse_embedding(row["embedding"])
-            arr = np.array(emb, dtype=float)
-
-            # Pool 2D embeddings into a single vector
-            if arr.ndim == 2:
-                arr = arr.mean(axis=0)
-
-            arr = arr.reshape(-1)
-        except (TypeError, ValueError, KeyError) as e:
-            _log.error("Skipping malformed embedding row job_id=%s: %s", row.get("job_id"), e)
-            continue
-
-        vectors.append(arr)
-        jobs.append({
-            "job_id": row.get("job_id"),
-            "title": row.get("title"),
-            "normalized_title": normalize_title(row.get("title")),
-            "description": row.get("description"),
-        })
-
-    return vectors, jobs
 
 
 def inject_css():
@@ -156,11 +127,18 @@ def main():
 
     # Render header using config values
     ui = config.ui
+    if _LOGO_B64:
+        logo_html = (
+            f'<img src="data:image/png;base64,{_LOGO_B64}" '
+            f'style="width:{ui.logo_size_px}px;height:{ui.logo_size_px}px;">'
+        )
+    else:
+        logo_html = f'<span style="font-size:{ui.logo_size_px}px;">🎯</span>'
+
     st.markdown(
         f"""
         <div class="app-header">
-            <img src="data:image/png;base64,{_LOGO_B64}"
-                 style="width:{ui.logo_size_px}px;height:{ui.logo_size_px}px;">
+            {logo_html}
             <h1 style="font-size:{ui.header_font_size_rem}rem;color:{ui.header_text_color};">
                 {_html.escape(ui.app_name)}
             </h1>
@@ -178,14 +156,22 @@ def main():
         render_dashboard_panel()
         st.stop()
 
-    # Core data load (shared across tabs)
+    # Core data load — served from process-level cache after first load.
+    # If the cache is empty it means prep hasn't been run yet.
     try:
-        supabase = get_supabase_client()
-        vectors, jobs = load_embeddings(supabase)
-        stats_by_title = load_stats_for_display(supabase)
+        vectors, jobs = load_embeddings_cached()
+        stats_by_title = load_stats_cached()
     except Exception as e:
         _log.error("Failed to load data from Supabase", exc_info=True)
         st.error("Could not connect to the database. Check the log for details.")
+        st.stop()
+
+    if not vectors:
+        st.warning(
+            "⚠️ No job data found. "
+            "Run `make prep` to compute embeddings and statistics before using the app.",
+            icon="⚠️",
+        )
         st.stop()
 
     # Top-level navigation

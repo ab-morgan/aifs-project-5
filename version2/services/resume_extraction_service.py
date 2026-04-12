@@ -74,7 +74,7 @@ def extract_experiences(
     resp = requests.post(cfg.endpoint, headers=headers, json=payload, timeout=60)
     if resp.status_code != 200:
         raise ResumeExtractionError(
-            f"Groq API error {resp.status_code}: {resp.text[:500]}"
+            f"Groq API error {resp.status_code}. Check logs for details."
         )
 
     try:

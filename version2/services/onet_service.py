@@ -40,7 +40,7 @@ def fetch_questions() -> list[dict[str, Any]]:
     url = f"{_BASE}/mnm/interestprofiler/questions_30"
     resp = requests.get(url, headers=_headers(), params={"start": 1, "end": 30}, timeout=15)
     if resp.status_code != 200:
-        raise OnetServiceError(f"O*NET questions error {resp.status_code}: {resp.text[:300]}")
+        raise OnetServiceError(f"O*NET questions error {resp.status_code}. Check logs for details.")
     data = resp.json()
     questions = data.get("question", [])
     return sorted(questions, key=lambda q: q["index"])
@@ -56,6 +56,6 @@ def fetch_results(answers: str) -> list[dict[str, Any]]:
     url = f"{_BASE}/mnm/interestprofiler/results"
     resp = requests.get(url, headers=_headers(), params={"answers": answers}, timeout=15)
     if resp.status_code != 200:
-        raise OnetServiceError(f"O*NET results error {resp.status_code}: {resp.text[:300]}")
+        raise OnetServiceError(f"O*NET results error {resp.status_code}. Check logs for details.")
     data = resp.json()
     return data.get("result", [])

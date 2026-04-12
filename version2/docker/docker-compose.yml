@@ -1,17 +1,17 @@
 version: "3.9"
 
 services:
-  job-match-app:
+  careerpivots:
     build:
-      context: ..
-      dockerfile: version2/docker/Dockerfile
-    container_name: job-match-app
+      context: ../..
+      dockerfile: version2/docker/Dockerfile.app
+    container_name: careerpivots
+    env_file:
+      - ../../.env.prod          # secrets — never committed to git
     environment:
-      # Pass Supabase config via env or mount settings.toml
-      SUPABASE_URL: "${SUPABASE_URL}"
-      SUPABASE_SERVICE_ROLE_KEY: "${SUPABASE_SERVICE_ROLE_KEY}"
+      APP_ENV: "prod"
     ports:
       - "8501:8501"
     volumes:
-      - ..:/app
+      - ../../version2/logs:/app/version2/logs   # persist logs outside container
     restart: unless-stopped

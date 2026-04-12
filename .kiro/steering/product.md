@@ -17,7 +17,7 @@ An intelligent platform that helps recently unemployed federal workers translate
 2. User optionally completes O*NET Interest Questionnaire → RIASEC scores stored in session and shown in sidebar
 3. User selects matches → downloads formatted HTML export
 4. Users explore job market statistics and analytics dashboards
-5. A prep pipeline runs offline to precompute and store job embeddings in Supabase
+5. A prep pipeline runs offline (once, before the app starts) to compute and store job embeddings and statistics in Supabase. The app loads this data into a process-level cache on startup and serves all users from cache.
 
 ## Target Users
 Recently unemployed federal workers seeking private-sector career transitions.

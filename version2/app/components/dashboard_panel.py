@@ -17,7 +17,7 @@ from __future__ import annotations
 
 import pandas as pd
 import streamlit as st
-from version2.core.supabase_client import get_supabase_client
+from core.supabase_client import get_supabase_client
 
 
 def _load_events():

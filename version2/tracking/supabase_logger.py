@@ -20,8 +20,8 @@ from __future__ import annotations
 
 from typing import Any, Dict
 
-from version2.core.supabase_client import get_supabase_client
-from version2.schemas.event import Event
+from core.supabase_client import get_supabase_client
+from schemas.event import Event
 
 
 def write_event(event: Event) -> None:

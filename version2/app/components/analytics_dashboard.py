@@ -14,12 +14,12 @@ which can be called from app.py inside main().
 
 import streamlit as st
 
-from components.sankey_panel import (
+from app.components.sankey_panel import (
     render_sankey_panel,
     render_multilevel_sankey
 )
 
-from components.transition_explorer import (
+from app.components.transition_explorer import (
     render_transition_explorer
 )
 
