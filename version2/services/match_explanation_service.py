@@ -5,6 +5,9 @@ import time
 import requests
 from typing import Dict, Any, List
 from infra.config import ResumeExtractionConfig
+from core.utils.logging import get_logger
+
+_log = get_logger(__name__)
 
 _MAX_RETRIES = 4
 _RETRY_DELAY = 1.0  # seconds; Groq rate limit resets within 1s
@@ -74,8 +77,10 @@ def explain_match(
     if resp.status_code == 429:
         raise MatchExplanationRateLimitError("Rate limit exceeded after retries")
     if resp.status_code != 200:
+        # Log the detail internally but don't expose raw API response to callers
+        _log.error("Groq API error %s: %s", resp.status_code, resp.text[:500])
         raise MatchExplanationError(
-            f"Groq API error {resp.status_code}: {resp.text[:500]}"
+            f"Groq API returned status {resp.status_code}. Check logs for details."
         )
 
     content = resp.json()["choices"][0]["message"]["content"]

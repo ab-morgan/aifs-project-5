@@ -30,3 +30,10 @@ accent_color = "#14b8a6"
 header_text_color = "#111111"
 body_text_color = "#333333"
 muted_text_color = "#666666"
+
+[limits]
+# Maximum resume size in characters (applies to both file upload and paste)
+# 50000 chars ≈ ~10 pages of text
+max_resume_chars = 50000
+# Maximum file upload size in megabytes (passed to Streamlit file_uploader)
+max_upload_mb = 5

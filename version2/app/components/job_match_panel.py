@@ -10,6 +10,7 @@ Redesigned job match panel matching the Career Match AI screenshot:
 """
 
 from __future__ import annotations
+import html
 import streamlit as st
 from services.match_explanation_service import (
     explain_match, MatchExplanationError, MatchExplanationRateLimitError
@@ -80,11 +81,13 @@ def _render_card(i: int, row: dict, is_selected: bool):
     # ── Card open ────────────────────────────────────────
     st.markdown('<div class="job-card">', unsafe_allow_html=True)
 
-    # Score badge + title row
+    # Score badge + title row — escape all DB-sourced strings
+    safe_title = html.escape(title)
+    safe_desc = html.escape(description)
     st.markdown(
         f'<div class="score-badge">{similarity:.0f}%</div>'
-        f'<h3>{title}</h3>'
-        f'<div class="job-desc">{description}</div>',
+        f'<h3>{safe_title}</h3>'
+        f'<div class="job-desc">{safe_desc}</div>',
         unsafe_allow_html=True,
     )
 
@@ -97,10 +100,11 @@ def _render_card(i: int, row: dict, is_selected: bool):
     if "experiences" in st.session_state:
         explanation = _render_explanation(i, row)
         if explanation:
+            safe_explanation = html.escape(explanation)
             st.markdown(
                 f'<div class="why-box">'
                 f'<div class="why-label">💡 Why this matches your experience</div>'
-                f'<p>{explanation}</p>'
+                f'<p>{safe_explanation}</p>'
                 f'</div>',
                 unsafe_allow_html=True,
             )
@@ -133,7 +137,7 @@ def _render_card(i: int, row: dict, is_selected: bool):
         max_pct = max((t.get("percent", 0) for t in top_transitions[:3]), default=0.01)
         rows_html = ""
         for idx, t in enumerate(top_transitions[:3], start=1):
-            t_title = t.get("next_job_title", "")
+            t_title = html.escape(t.get("next_job_title", ""))
             t_pct = t.get("percent", 0)
             rows_html += (
                 f'<div class="transition-row">'
@@ -174,15 +178,15 @@ def _build_print_html(selected_rows: list[dict]) -> str:
         avg_display = f"{avg_tenure:.2f} years" if avg_tenure is not None else "N/A"
         med_display = f"{median_tenure:.2f} years" if median_tenure is not None else "N/A"
         explanation_html = (
-            f"<p>{explanation}</p>"
+            f"<p>{html.escape(explanation)}</p>"
             if explanation and not explanation.startswith("__")
             else "<p><em>Not available</em></p>"
         )
 
         items_html += f"""
         <div class="job">
-            <h2>{idx}. {title} <span class="score">{similarity:.0f}%</span></h2>
-            <h3>Description</h3><p>{description}</p>
+            <h2>{idx}. {html.escape(title)} <span class="score">{similarity:.0f}%</span></h2>
+            <h3>Description</h3><p>{html.escape(description)}</p>
             <h3>Why This Job Matches Your Experience</h3>{explanation_html}
             <h3>Job Insights</h3>
             <table>

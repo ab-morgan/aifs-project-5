@@ -24,7 +24,11 @@ class OnetServiceError(Exception):
 
 
 def _headers() -> dict[str, str]:
-    key = os.getenv("ONET_API_KEY", "PLACEHOLDER_ONET_API_KEY")
+    key = os.getenv("ONET_API_KEY")
+    if not key or key.startswith("PLACEHOLDER"):
+        raise OnetServiceError(
+            "ONET_API_KEY is not set. Add it to your .env file."
+        )
     return {"X-API-Key": key, "Accept": "application/json"}
 
 

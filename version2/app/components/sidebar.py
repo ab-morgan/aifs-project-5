@@ -10,7 +10,16 @@ Redesigned sidebar matching the Career Match AI layout:
 """
 
 from __future__ import annotations
+import html
 import streamlit as st
+
+
+_CONTROL_CHARS = str.maketrans("", "", "".join(chr(i) for i in range(32) if i not in (9, 10, 13)))
+
+
+def _sanitize_text(text: str) -> str:
+    """Strip null bytes and non-printable control characters from resume text."""
+    return text.translate(_CONTROL_CHARS).strip()
 
 
 def _read_uploaded_file(uploaded_file) -> str:
@@ -31,17 +40,26 @@ def _read_uploaded_file(uploaded_file) -> str:
 
 def render_sidebar(session_id: str):
     sb = st.sidebar
+    config = st.session_state.get("config")
+    limits = config.limits if config else None
+    max_chars = limits.max_resume_chars if limits else 50000
+    max_mb = limits.max_upload_mb if limits else 5
 
     # ── Resume ──────────────────────────────────────────
     sb.markdown('<div class="sidebar-section-label">Resume</div>', unsafe_allow_html=True)
-    uploaded = sb.file_uploader("Upload a file (PDF, DOCX, TXT)", type=["pdf", "docx", "txt"], label_visibility="visible")
-    sb.caption("Or paste your resume text below")
+    uploaded = sb.file_uploader(
+        f"Upload a file (PDF, DOCX, TXT — max {max_mb} MB)",
+        type=["pdf", "docx", "txt"],
+        label_visibility="visible",
+    )
+    sb.caption(f"Or paste your resume text below (max {max_chars:,} characters)")
     pasted = sb.text_area(
         "",
         key="resume_text_input",
         placeholder="Paste resume text here…",
         height=160,
         label_visibility="collapsed",
+        max_chars=max_chars,
     )
 
     # ── Interest Profile ─────────────────────────────────
@@ -110,15 +128,27 @@ def render_sidebar(session_id: str):
     if submitted:
         # File upload takes priority over pasted text
         if uploaded:
+            # Enforce file size limit
+            file_size_mb = uploaded.size / (1024 * 1024)
+            if file_size_mb > max_mb:
+                sb.error(f"File is {file_size_mb:.1f} MB. Maximum allowed is {max_mb} MB.")
+                return None
             text = _read_uploaded_file(uploaded)
+            if len(text) > max_chars:
+                sb.error(f"Resume content exceeds {max_chars:,} characters after extraction. Please shorten it.")
+                return None
             if text.strip():
                 st.session_state["preferences"] = preferences
                 st.session_state["exclusions"] = exclusions
-                return text
+                return _sanitize_text(text)
         if pasted.strip():
+            # max_chars is already enforced by the text_area widget, but double-check
+            if len(pasted) > max_chars:
+                sb.error(f"Pasted text exceeds {max_chars:,} characters.")
+                return None
             st.session_state["preferences"] = preferences
             st.session_state["exclusions"] = exclusions
-            return pasted.strip()
+            return _sanitize_text(pasted)
         sb.warning("Please upload a file or paste your resume text before finding matches.")
 
     return None

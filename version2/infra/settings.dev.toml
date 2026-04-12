@@ -1,0 +1,18 @@
+# settings.dev.toml
+# Development overrides — merged on top of settings.toml when APP_ENV=dev
+# Safe to commit (no secrets).
+
+[app]
+env = "dev"
+debug = true
+
+[embeddings]
+batch_size = 8          # smaller batches for faster iteration locally
+
+[limits]
+max_resume_chars = 100000   # relaxed for testing large resumes
+max_upload_mb = 10
+
+[server]
+port = 8300
+log_level = "debug"         # verbose Streamlit + app logging in dev

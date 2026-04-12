@@ -33,6 +33,7 @@ from core.utils.logging import configure_logging, get_logger
 configure_logging()
 _log = get_logger(__name__)
 
+import html as _html
 import streamlit as st
 
 st.set_page_config(
@@ -88,18 +89,20 @@ def load_embeddings(supabase):
     jobs = []
 
     for row in rows:
-        emb = parse_embedding(row["embedding"])
-        arr = np.array(emb, dtype=float)
+        try:
+            emb = parse_embedding(row["embedding"])
+            arr = np.array(emb, dtype=float)
 
-        # Pool 2D embeddings into a single vector
-        if arr.ndim == 2:
-            arr = arr.mean(axis=0)
+            # Pool 2D embeddings into a single vector
+            if arr.ndim == 2:
+                arr = arr.mean(axis=0)
 
-        # Ensure final shape is (384,)
-        arr = arr.reshape(-1)
+            arr = arr.reshape(-1)
+        except (TypeError, ValueError, KeyError) as e:
+            _log.error("Skipping malformed embedding row job_id=%s: %s", row.get("job_id"), e)
+            continue
 
         vectors.append(arr)
-
         jobs.append({
             "job_id": row.get("job_id"),
             "title": row.get("title"),
@@ -141,8 +144,8 @@ def inject_css():
 
 
 def main():
-    # Load config ONCE — force reload if the cached object is stale (missing ui)
-    if "config" not in st.session_state or not hasattr(st.session_state["config"], "ui"):
+    # Load config ONCE — force reload if the cached object is stale (missing ui or limits)
+    if "config" not in st.session_state or not hasattr(st.session_state["config"], "ui") or not hasattr(st.session_state["config"], "limits"):
         from dotenv import load_dotenv
         load_dotenv()
         st.session_state["config"] = load_settings()
@@ -159,7 +162,7 @@ def main():
             <img src="data:image/png;base64,{_LOGO_B64}"
                  style="width:{ui.logo_size_px}px;height:{ui.logo_size_px}px;">
             <h1 style="font-size:{ui.header_font_size_rem}rem;color:{ui.header_text_color};">
-                {ui.app_name}
+                {_html.escape(ui.app_name)}
             </h1>
         </div>
         """,

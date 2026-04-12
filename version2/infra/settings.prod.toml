@@ -1,0 +1,18 @@
+# settings.prod.toml
+# Production overrides — merged on top of settings.toml when APP_ENV=prod
+# Safe to commit (no secrets).
+
+[app]
+env = "prod"
+debug = false
+
+[embeddings]
+batch_size = 16
+
+[limits]
+max_resume_chars = 50000
+max_upload_mb = 5
+
+[server]
+port = 8501
+log_level = "error"         # errors only in production
