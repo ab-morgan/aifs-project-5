@@ -1,0 +1,39 @@
+# settings.toml
+# Central configuration for version2
+
+
+[embeddings]
+# provider - "ollama"
+provider = "sentence_transformer"            # "openai" | "ollama" | "sentence_transformer" | "cohere"
+# model_name = "mxbai-embed-large"
+model_name = "all-MiniLM-L6-v2"
+batch_size = 16         #8 to 32 is typical
+normalize = true
+
+
+[resume_extraction]
+provider = "groq"
+model = "llama-3.1-8b-instant"
+endpoint = "https://api.groq.com/openai/v1/chat/completions"
+
+[ui]
+app_name = "CareerPivots"
+logo_size_px = 56
+header_font_size_rem = 2.0
+body_font_size_rem = 1.0
+card_title_font_size_rem = 1.1
+insight_value_font_size_rem = 1.05
+sidebar_font_size_rem = 0.95
+background_color = "#f4f6f9"
+card_background_color = "#ffffff"
+accent_color = "#14b8a6"
+header_text_color = "#111111"
+body_text_color = "#333333"
+muted_text_color = "#666666"
+
+[limits]
+# Maximum resume size in characters (applies to both file upload and paste)
+# 50000 chars ≈ ~10 pages of text
+max_resume_chars = 50000
+# Maximum file upload size in megabytes (passed to Streamlit file_uploader)
+max_upload_mb = 5

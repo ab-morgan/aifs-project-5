@@ -1,0 +1,27 @@
+# Python cache + compiled files
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
+
+# Virtual environments
+venv/
+.env/
+.venv/
+
+# Streamlit cache
+.streamlit/
+
+# Secrets and Environment variables
+.env
+.env.dev
+.env.prod
+
+# Log files
+*.log
+version2/logs/

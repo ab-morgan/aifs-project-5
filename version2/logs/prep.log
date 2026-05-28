@@ -1,0 +1,155 @@
+2026-02-06 05:32:27,679 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 05:32:27,680 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 05:35:48,509 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 05:35:48,509 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 05:35:48,594 [INFO] core.supabase_client: Supabase client initialized successfully.
+2026-02-06 05:35:49,511 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobs?select=%2A&limit=1 "HTTP/2 404 Not Found"
+2026-02-06 05:35:49,512 [ERROR] prep.verify_data: Supabase connection check failed: {'message': "Could not find the table 'public.jobs' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.jobhop_stats'", 'details': None}
+2026-02-06 05:35:49,512 [ERROR] prep.verify_data: verify_data failed: Supabase connection failed
+2026-02-06 05:35:49,512 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": false,
+  "schema_ok": false,
+  "missing_embeddings": true,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "error": "Supabase connection failed"
+  }
+}
+2026-02-06 05:35:49,512 [ERROR] __main__: Prep aborted: database tables or schema are not ready.
+2026-02-06 05:47:36,924 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 05:47:36,924 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 05:47:36,958 [INFO] core.supabase_client: Supabase client initialized successfully.
+2026-02-06 05:47:37,372 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobs?select=%2A&limit=1 "HTTP/2 404 Not Found"
+2026-02-06 05:47:37,373 [ERROR] prep.verify_data: Supabase connection check failed: {'message': "Could not find the table 'public.jobs' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.jobhop_stats'", 'details': None}
+2026-02-06 05:47:37,373 [ERROR] prep.verify_data: verify_data failed: Supabase connection failed
+2026-02-06 05:47:37,373 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": false,
+  "schema_ok": false,
+  "missing_embeddings": true,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "error": "Supabase connection failed"
+  }
+}
+2026-02-06 05:47:37,373 [ERROR] __main__: Prep aborted: database tables or schema are not ready.
+2026-02-06 05:48:49,457 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 05:48:49,458 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 05:48:49,480 [INFO] core.supabase_client: Supabase client initialized successfully.
+2026-02-06 05:48:49,618 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobs?select=%2A&limit=1 "HTTP/2 404 Not Found"
+2026-02-06 05:48:49,619 [ERROR] prep.verify_data: Supabase connection check failed: {'message': "Could not find the table 'public.jobs' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.jobhop_stats'", 'details': None}
+2026-02-06 05:48:49,619 [ERROR] prep.verify_data: verify_data failed: Supabase connection failed
+2026-02-06 05:48:49,619 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": false,
+  "schema_ok": false,
+  "missing_embeddings": true,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "error": "Supabase connection failed"
+  }
+}
+2026-02-06 05:48:49,619 [ERROR] __main__: Prep aborted: database tables or schema are not ready.
+2026-02-06 05:53:45,012 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 05:53:45,012 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 05:53:45,658 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobs?select=%2A&limit=1 "HTTP/2 404 Not Found"
+2026-02-06 05:53:45,659 [ERROR] prep.verify_data: Supabase connection check failed: {'message': "Could not find the table 'public.jobs' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.jobhop_stats'", 'details': None}
+2026-02-06 05:53:45,659 [ERROR] prep.verify_data: verify_data failed: Supabase connection failed
+2026-02-06 05:53:45,659 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": false,
+  "schema_ok": false,
+  "missing_embeddings": true,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "error": "Supabase connection failed"
+  }
+}
+2026-02-06 05:53:45,659 [ERROR] __main__: Prep aborted: database tables or schema are not ready.
+2026-02-06 06:11:17,170 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 06:11:17,171 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 06:17:14,764 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 06:17:14,764 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 06:18:13,269 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 06:18:13,269 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 06:18:13,292 [INFO] core.supabase_client: Supabase client initialized successfully.
+2026-02-06 06:18:13,981 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_raw?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:18:14,044 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_raw?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:18:14,174 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_embeddings?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:18:14,273 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_stats?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:18:14,338 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_embeddings?select=id&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:18:14,407 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_stats?select=id&limit=1 "HTTP/2 400 Bad Request"
+2026-02-06 06:18:14,407 [WARNING] prep.verify_data: Could not check stats presence: {'message': 'column jobhop_stats.id does not exist', 'code': '42703', 'hint': None, 'details': None}
+2026-02-06 06:18:14,408 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": true,
+  "schema_ok": true,
+  "missing_embeddings": false,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "tables": {
+      "jobhop_raw": true,
+      "jobhop_embeddings": true,
+      "jobhop_stats": true
+    },
+    "missing_embeddings": false,
+    "missing_stats": true,
+    "model_details": {
+      "error": "embeddings.provider or embeddings.model_name missing in settings.toml"
+    }
+  }
+}
+2026-02-06 06:18:14,408 [INFO] prep.verify_data: verify_data completed.
+2026-02-06 06:18:14,408 [INFO] __main__: Embeddings already exist — skipping embedding generation.
+2026-02-06 06:18:14,408 [INFO] __main__: Stats missing or embeddings updated — computing stats...
+2026-02-06 06:18:14,408 [INFO] prep.compute_stats: Starting compute_stats step...
+2026-02-06 06:18:14,470 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/job_embeddings?select=%2A "HTTP/2 404 Not Found"
+2026-02-06 06:18:14,471 [ERROR] prep.compute_stats: Failed to fetch embeddings: {'message': "Could not find the table 'public.job_embeddings' in the schema cache", 'code': 'PGRST205', 'hint': "Perhaps you meant the table 'public.jobhop_embeddings'", 'details': None}
+2026-02-06 06:22:02,518 [INFO] __main__: === PREP PIPELINE STARTED ===
+2026-02-06 06:22:02,518 [INFO] prep.verify_data: Starting verify_data step...
+2026-02-06 06:22:02,540 [INFO] core.supabase_client: Supabase client initialized successfully.
+2026-02-06 06:22:02,787 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_raw?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:22:02,850 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_raw?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:22:02,940 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_embeddings?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:22:03,033 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_stats?select=%2A&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:22:03,124 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_embeddings?select=id&limit=1 "HTTP/2 200 OK"
+2026-02-06 06:22:03,195 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_stats?select=id&limit=1 "HTTP/2 400 Bad Request"
+2026-02-06 06:22:03,196 [WARNING] prep.verify_data: Could not check stats presence: {'message': 'column jobhop_stats.id does not exist', 'code': '42703', 'hint': None, 'details': None}
+2026-02-06 06:22:03,196 [INFO] prep.verify_data: verify_data report:
+{
+  "tables_ok": true,
+  "schema_ok": true,
+  "missing_embeddings": false,
+  "missing_stats": true,
+  "model": "",
+  "model_ready": false,
+  "details": {
+    "tables": {
+      "jobhop_raw": true,
+      "jobhop_embeddings": true,
+      "jobhop_stats": true
+    },
+    "missing_embeddings": false,
+    "missing_stats": true,
+    "model_details": {
+      "error": "embeddings.provider or embeddings.model_name missing in settings.toml"
+    }
+  }
+}
+2026-02-06 06:22:03,196 [INFO] prep.verify_data: verify_data completed.
+2026-02-06 06:22:03,196 [INFO] __main__: Embeddings already exist — skipping embedding generation.
+2026-02-06 06:22:03,196 [INFO] __main__: Stats missing or embeddings updated — computing stats...
+2026-02-06 06:22:03,196 [INFO] prep.compute_stats: Starting compute_stats step...
+2026-02-06 06:22:04,287 [INFO] httpx: HTTP Request: GET https://kfrwbnfpayqyisrgmrte.supabase.co/rest/v1/jobhop_embeddings?select=%2A "HTTP/2 200 OK"
+2026-02-06 06:22:04,564 [INFO] prep.compute_stats: Fetched 1000 embeddings.

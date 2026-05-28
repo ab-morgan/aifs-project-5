@@ -1,0 +1,17 @@
+version: "3.9"
+
+services:
+  careerpivots:
+    build:
+      context: ../..
+      dockerfile: version2/docker/Dockerfile.app
+    container_name: careerpivots
+    env_file:
+      - ../../.env.prod          # secrets — never committed to git
+    environment:
+      APP_ENV: "prod"
+    ports:
+      - "8501:8501"
+    volumes:
+      - ../../version2/logs:/app/version2/logs   # persist logs outside container
+    restart: unless-stopped
