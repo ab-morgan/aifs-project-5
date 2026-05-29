@@ -33,6 +33,3 @@ frontend/.vite/
 
 # Zip files (local working files, not source)
 *.zip
-
-# Empty placeholder directories
-resume-rag-demo/
