@@ -1,0 +1,10 @@
+{
+  "css.customData": [],
+  "css.validate": false,
+  "scss.validate": false,
+  "tailwindCSS.experimental.classRegex": [],
+  "tailwindCSS.includeLanguages": {
+    "typescript": "javascript",
+    "typescriptreact": "javascript"
+  }
+}
