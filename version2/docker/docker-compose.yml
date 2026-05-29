@@ -1,17 +1,55 @@
 version: "3.9"
 
 services:
+  # ── FastAPI backend ──────────────────────────────────────────────────────────
+  fastapi:
+    build:
+      context: ../..
+      dockerfile: version2/docker/Dockerfile.api
+    container_name: careerpivots-api
+    env_file:
+      - ../../.env.prod          # SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, GROQ_API_KEY
+    environment:
+      APP_ENV: "prod"
+    ports:
+      - "8000:8000"
+    volumes:
+      - ../../version2/logs:/app/version2/logs
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 60s   # allow time for sentence-transformers to load
+
+  # ── React frontend (production static build) ─────────────────────────────────
+  frontend:
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+      args:
+        VITE_API_URL: "http://fastapi:8000"
+    container_name: careerpivots-frontend
+    ports:
+      - "5173:5173"
+    depends_on:
+      fastapi:
+        condition: service_healthy
+    restart: unless-stopped
+
+  # ── Streamlit app (preserved — runs independently) ──────────────────────────
   careerpivots:
     build:
       context: ../..
       dockerfile: version2/docker/Dockerfile.app
     container_name: careerpivots
     env_file:
-      - ../../.env.prod          # secrets — never committed to git
+      - ../../.env.prod
     environment:
       APP_ENV: "prod"
     ports:
       - "8501:8501"
     volumes:
-      - ../../version2/logs:/app/version2/logs   # persist logs outside container
+      - ../../version2/logs:/app/version2/logs
     restart: unless-stopped

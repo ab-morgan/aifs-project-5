@@ -25,3 +25,11 @@ venv/
 # Log files
 *.log
 version2/logs/
+
+# Node / frontend
+frontend/node_modules/
+frontend/dist/
+frontend/.vite/
+
+# Zip files (local working files, not source)
+*.zip
